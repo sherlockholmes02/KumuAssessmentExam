@@ -1,5 +1,6 @@
 package com.kumu.assessmentexam.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -7,10 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import com.kumu.assessmentexam.R
 import com.kumu.assessmentexam.data.model.Media
 import com.kumu.assessmentexam.databinding.ActivityMainBinding
-import com.kumu.assessmentexam.main.adapters.MovieAdapter
+import com.kumu.assessmentexam.details.MediaDetailsActivity
+import com.kumu.assessmentexam.main.adapters.MediaAdapter
 import com.kumu.assessmentexam.network.ApiInterface
 import com.kumu.assessmentexam.utils.Coroutines
 import com.kumu.assessmentexam.utils.NetworkUtil
@@ -19,8 +22,8 @@ import com.kumu.assessmentexam.utils.RetrofitSingleton
 class MainActivity : AppCompatActivity(), MainInterface {
 
     private lateinit var binding: ActivityMainBinding
-    private val movieAdapter = MovieAdapter()
-    private var movies = mutableListOf<Media>()
+    private lateinit var mediaAdapter: MediaAdapter
+    private var medias = mutableListOf<Media>()
 
     private lateinit var viewModel: MainViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,11 +36,21 @@ class MainActivity : AppCompatActivity(), MainInterface {
         viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
         viewModel.mainListener = this
 
-        setListeners()
+        initUI()
         checkInternetConnection()
     }
 
-    private fun setListeners() {
+    private fun initUI() {
+
+        mediaAdapter = MediaAdapter().apply {
+            setOnItemClickListener {
+                val gson = Gson()
+                val intent = Intent(this@MainActivity, MediaDetailsActivity::class.java)
+                intent.putExtra("media", gson.toJson(it))
+                startActivity(intent)
+            }
+        }
+
         binding.srlRefresh.setOnRefreshListener {
             binding.srlRefresh.isRefreshing = false
             checkInternetConnection()
@@ -62,11 +75,11 @@ class MainActivity : AppCompatActivity(), MainInterface {
                 layoutManager =
                     LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
                 setHasFixedSize(true)
-                adapter = movieAdapter
+                adapter = mediaAdapter
             }
-            this.movies.clear()
-            this.movies.addAll(media)
-            movieAdapter.submitList(media)
+            this.medias.clear()
+            this.medias.addAll(media)
+            mediaAdapter.submitList(media)
         }
     }
 

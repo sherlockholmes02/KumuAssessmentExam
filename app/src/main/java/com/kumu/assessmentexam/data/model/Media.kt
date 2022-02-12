@@ -53,6 +53,8 @@ import com.google.gson.annotations.SerializedName
 data class Media(
     var trackId: Int,
     var trackName: String,
+    var kind: String,
+    var previewUrl: String,
     @SerializedName("artworkUrl100")
     var artwork: String,
     var trackPrice: Double,
@@ -64,5 +66,8 @@ data class Media(
     var longDescription: String,
     @SerializedName("primaryGenreName")
     var genre: String,
-    var trackTimeMillis: Int,
+    var description: String,
+    var collectionName: String,
+    var collectionPrice: Double,
+    var trackTimeMillis: Long,
 )

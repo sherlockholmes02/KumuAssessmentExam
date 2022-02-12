@@ -1,6 +1,7 @@
 package com.kumu.assessmentexam.main.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
@@ -15,7 +16,7 @@ import com.squareup.picasso.Picasso
 /**
  * Created by Darryl Dave P. de Castro on 12/02/2022.
  */
-class MovieAdapter : ListAdapter<Media, MovieAdapter.ViewHolder>(
+class MediaAdapter : ListAdapter<Media, MediaAdapter.ViewHolder>(
     object : DiffUtil.ItemCallback<Media>() {
         override fun areItemsTheSame(oldItem: Media, newItem: Media): Boolean =
             oldItem.trackId == newItem.trackId
@@ -24,6 +25,8 @@ class MovieAdapter : ListAdapter<Media, MovieAdapter.ViewHolder>(
             oldItem == newItem
     }
 ) {
+
+    private var onItemClickListener: (Media) -> Unit = { }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
@@ -40,15 +43,29 @@ class MovieAdapter : ListAdapter<Media, MovieAdapter.ViewHolder>(
             val item = currentList[holder.absoluteAdapterPosition]
             holder.binding.media = item
 
-            holder.binding.tvPrice.text = "$" + item.trackPrice.toString()
+            if (item.trackName != null) {
+                holder.binding.tvTrackName.text = item.trackName
+            } else {
+                holder.binding.tvTrackName.text = item.collectionName
+            }
+
+            holder.binding.root.setOnClickListener {
+                onItemClickListener.invoke(item)
+            }
 
             Picasso.get()
                 .load(item.artwork)
+                .placeholder(R.drawable.logo)
+                .error(R.drawable.logo)
                 .into(holder.binding.ivArtwork)
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun setOnItemClickListener(onItemClickListener: (Media) -> Unit) {
+        this.onItemClickListener = onItemClickListener
     }
 
     class ViewHolder(val binding: ItemMediaBinding) : RecyclerView.ViewHolder(binding.root)
