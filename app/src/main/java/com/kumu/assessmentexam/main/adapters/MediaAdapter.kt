@@ -43,17 +43,27 @@ class MediaAdapter : ListAdapter<Media, MediaAdapter.ViewHolder>(
             val item = currentList[holder.absoluteAdapterPosition]
             holder.binding.media = item
 
+            //Handle in case of null trackName eg. audiobooks kind
             if (item.trackName != null) {
                 holder.binding.tvTrackName.text = item.trackName
             } else {
                 holder.binding.tvTrackName.text = item.collectionName
             }
 
+            //Handle in case of null trackPrice eg. audiobooks
             holder.binding.tvPrice.text = "$" + item.trackPrice.toString()
             if (item.trackPrice != null) {
                 holder.binding.tvPrice.text = "$" + item.trackPrice.toString()
             } else {
                 holder.binding.tvPrice.text = "$" + item.collectionPrice.toString()
+            }
+
+            //Last Visited handler
+            if (item.lastVisited != null) {
+                holder.binding.tvLastVisited.visibility = View.VISIBLE
+                holder.binding.tvLastVisited.text = "Last visited: " + item.lastVisited
+            } else {
+                holder.binding.tvLastVisited.visibility = View.GONE
             }
 
             holder.binding.root.setOnClickListener {

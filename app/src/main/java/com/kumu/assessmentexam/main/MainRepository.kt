@@ -30,4 +30,10 @@ class MainRepository(private val apiInterface: ApiInterface, private val mediaDa
             mediaDatabase.mediaDao().insertAllMedias(medias)
         }
     }
+
+    fun updateLastVisit(media: Media) {
+        Coroutines.inputOutput {
+            mediaDatabase.mediaDao().update(media)
+        }
+    }
 }

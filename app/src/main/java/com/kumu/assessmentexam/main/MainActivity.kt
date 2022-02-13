@@ -19,6 +19,8 @@ import com.kumu.assessmentexam.network.ApiInterface
 import com.kumu.assessmentexam.utils.Coroutines
 import com.kumu.assessmentexam.utils.NetworkUtil
 import com.kumu.assessmentexam.utils.RetrofitSingleton
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity(), MainInterface {
 
@@ -48,6 +50,14 @@ class MainActivity : AppCompatActivity(), MainInterface {
     private fun initUI() {
         mediaAdapter = MediaAdapter().apply {
             setOnItemClickListener {
+
+                //Update last visited date
+                val sdf = SimpleDateFormat("MMM dd, yyyy | hh:mm a")
+                val currentDate = sdf.format(Date())
+                it.lastVisited = currentDate
+                viewModel.updateLastVisit(it)
+
+                //Redirect to Media Details
                 val gson = Gson()
                 val intent = Intent(this@MainActivity, MediaDetailsActivity::class.java)
                 intent.putExtra("media", gson.toJson(it))
@@ -62,6 +72,7 @@ class MainActivity : AppCompatActivity(), MainInterface {
     }
 
     private suspend fun getMediaListFromDb() {
+        //Observe first if local db is empty
         Coroutines.main {
             val medias = viewModel.medias.await()
             medias.observe(this, {
@@ -77,6 +88,7 @@ class MainActivity : AppCompatActivity(), MainInterface {
     }
 
     private fun checkInternetConnection() {
+        //Check Internet connection before getting media list from API
         if (NetworkUtil.isNetworkAvailable(this)) {
             viewModel.getMedias()
         } else {

@@ -22,9 +22,16 @@ class MainViewModel(private val mainRepository: MainRepository) : ViewModel() {
             val movieResponse = mainRepository.getMedias()
             if (movieResponse.code() == 200) {
                 mainListener?.onSuccessfulFetch(movieResponse.body()?.media!!)
+                //Save to local db after successful fetching from api
                 mainRepository.saveMedias(movieResponse.body()?.media!!)
             }
             mainListener?.hideProgressBar()
+        }
+    }
+
+    fun updateLastVisit(media: Media) {
+        Coroutines.inputOutput {
+            mainRepository.updateLastVisit(media)
         }
     }
 }

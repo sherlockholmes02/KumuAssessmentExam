@@ -33,6 +33,7 @@ class MediaDetailsActivity : AppCompatActivity() {
         val media = gson.fromJson(intent.getStringExtra("media"), Media::class.java)
         binding.media = media
 
+        //Handling for different kinds of media
         if (media.kind == getString(R.string.movie)) {
             binding.tvPrice.visibility = View.GONE
 
@@ -90,6 +91,7 @@ class MediaDetailsActivity : AppCompatActivity() {
         }
 
         binding.btnPlay.setOnClickListener {
+            //Check internet connection before redirecting to video
             if (NetworkUtil.isNetworkAvailable(this)) {
                 val intent = Intent(this@MediaDetailsActivity, VideoActivity::class.java)
                 intent.putExtra("media", media.previewUrl)
@@ -105,6 +107,7 @@ class MediaDetailsActivity : AppCompatActivity() {
         }
     }
 
+    //Converter for tracktime to readable string
     fun convertMillisToRuntime(millis: Long): String {
         val m = millis / 60 % 60
         val h = millis / (60 * 60) % 24

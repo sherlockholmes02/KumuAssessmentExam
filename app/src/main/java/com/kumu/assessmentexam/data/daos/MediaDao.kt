@@ -1,10 +1,7 @@
 package com.kumu.assessmentexam.data.daos
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.kumu.assessmentexam.data.model.Media
 
 @Dao
@@ -23,4 +20,7 @@ interface MediaDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAllMedias(medias: List<Media>)
+
+    @Update
+    fun update(media: Media)
 }

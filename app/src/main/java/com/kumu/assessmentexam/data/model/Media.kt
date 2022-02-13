@@ -55,7 +55,7 @@ import com.google.gson.annotations.SerializedName
 @Entity(tableName = "medias")
 data class Media(
     @PrimaryKey
-    var trackId: Int,
+    var trackId: Long,
     var trackName: String?,
     var kind: String?,
     var previewUrl: String,
@@ -74,4 +74,5 @@ data class Media(
     var collectionName: String?,
     var collectionPrice: Double?,
     var trackTimeMillis: Long?,
+    var lastVisited: String?,
 )
