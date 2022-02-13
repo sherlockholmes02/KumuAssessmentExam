@@ -1,5 +1,7 @@
 package com.kumu.assessmentexam.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -50,24 +52,26 @@ import com.google.gson.annotations.SerializedName
 }
 *
 * */
+@Entity(tableName = "medias")
 data class Media(
+    @PrimaryKey
     var trackId: Int,
-    var trackName: String,
-    var kind: String,
+    var trackName: String?,
+    var kind: String?,
     var previewUrl: String,
     @SerializedName("artworkUrl100")
     var artwork: String,
-    var trackPrice: Double,
-    var trackRentalPrice: Double,
-    var collectionHdPrice: Double,
-    var trackHdPrice: Double,
-    var trackHdRentalPrice: Double,
-    var releaseDate: String,
-    var longDescription: String,
+    var trackPrice: Double?,
+    var trackRentalPrice: Double?,
+    var collectionHdPrice: Double?,
+    var trackHdPrice: Double?,
+    var trackHdRentalPrice: Double?,
+    var releaseDate: String?,
+    var longDescription: String?,
     @SerializedName("primaryGenreName")
-    var genre: String,
-    var description: String,
-    var collectionName: String,
-    var collectionPrice: Double,
-    var trackTimeMillis: Long,
+    var genre: String?,
+    var description: String?,
+    var collectionName: String?,
+    var collectionPrice: Double?,
+    var trackTimeMillis: Long?,
 )

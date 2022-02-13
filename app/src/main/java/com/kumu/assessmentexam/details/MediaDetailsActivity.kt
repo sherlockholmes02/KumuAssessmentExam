@@ -75,7 +75,9 @@ class MediaDetailsActivity : AppCompatActivity() {
             }
         }
 
-        binding.tvRuntime.text = convertMillisToRuntime(media.trackTimeMillis)
+        if (media.trackTimeMillis != null) {
+            binding.tvRuntime.text = convertMillisToRuntime(media.trackTimeMillis!!)
+        }
 
         Picasso.get()
             .load(media.artwork)

@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import com.kumu.assessmentexam.R
+import com.kumu.assessmentexam.data.MediaDatabase
 import com.kumu.assessmentexam.data.model.Media
 import com.kumu.assessmentexam.databinding.ActivityMainBinding
 import com.kumu.assessmentexam.details.MediaDetailsActivity
@@ -30,18 +31,21 @@ class MainActivity : AppCompatActivity(), MainInterface {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        val mediaDatabase = MediaDatabase.getInstance()
         var apiInterface = RetrofitSingleton.get<ApiInterface>()
-        val profileRepository = MainRepository(apiInterface)
+        val profileRepository = MainRepository(apiInterface, mediaDatabase)
         val factory = MainViewModelFactory(profileRepository)
         viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
         viewModel.mainListener = this
 
         initUI()
-        checkInternetConnection()
+
+        Coroutines.inputOutput {
+            getMediaListFromDb()
+        }
     }
 
     private fun initUI() {
-
         mediaAdapter = MediaAdapter().apply {
             setOnItemClickListener {
                 val gson = Gson()
@@ -54,6 +58,21 @@ class MainActivity : AppCompatActivity(), MainInterface {
         binding.srlRefresh.setOnRefreshListener {
             binding.srlRefresh.isRefreshing = false
             checkInternetConnection()
+        }
+    }
+
+    private suspend fun getMediaListFromDb() {
+        Coroutines.main {
+            val medias = viewModel.medias.await()
+            medias.observe(this, {
+                if (it.isEmpty()) {
+                    checkInternetConnection()
+                } else {
+                    this.medias.clear()
+                    this.medias.addAll(it)
+                    initRecyclerview()
+                }
+            })
         }
     }
 
@@ -70,6 +89,12 @@ class MainActivity : AppCompatActivity(), MainInterface {
     }
 
     override fun onSuccessfulFetch(media: List<Media>) {
+        this.medias.clear()
+        this.medias.addAll(media)
+        initRecyclerview()
+    }
+
+    private fun initRecyclerview() {
         Coroutines.main {
             binding.rvMedias.apply {
                 layoutManager =
@@ -77,9 +102,7 @@ class MainActivity : AppCompatActivity(), MainInterface {
                 setHasFixedSize(true)
                 adapter = mediaAdapter
             }
-            this.medias.clear()
-            this.medias.addAll(media)
-            mediaAdapter.submitList(media)
+            mediaAdapter.submitList(medias)
         }
     }
 

@@ -49,6 +49,13 @@ class MediaAdapter : ListAdapter<Media, MediaAdapter.ViewHolder>(
                 holder.binding.tvTrackName.text = item.collectionName
             }
 
+            holder.binding.tvPrice.text = "$" + item.trackPrice.toString()
+            if (item.trackPrice != null) {
+                holder.binding.tvPrice.text = "$" + item.trackPrice.toString()
+            } else {
+                holder.binding.tvPrice.text = "$" + item.collectionPrice.toString()
+            }
+
             holder.binding.root.setOnClickListener {
                 onItemClickListener.invoke(item)
             }
