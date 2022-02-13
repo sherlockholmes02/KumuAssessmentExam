@@ -7,5 +7,5 @@ import retrofit2.http.GET
 interface ApiInterface {
 
     @GET("search?term=star&amp;country=au&amp;media=movie&amp;all")
-    suspend fun getMovies(): Response<MediaResponse>
+    suspend fun getMedias(): Response<MediaResponse>
 }

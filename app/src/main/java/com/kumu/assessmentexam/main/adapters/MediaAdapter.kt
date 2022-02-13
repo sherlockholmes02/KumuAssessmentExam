@@ -26,7 +26,7 @@ class MediaAdapter : ListAdapter<Media, MediaAdapter.ViewHolder>(
     }
 ) {
 
-    private var onItemClickListener: (Media) -> Unit = { }
+    private var onItemClickListener: (Int) -> Unit = { }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
@@ -67,7 +67,7 @@ class MediaAdapter : ListAdapter<Media, MediaAdapter.ViewHolder>(
             }
 
             holder.binding.root.setOnClickListener {
-                onItemClickListener.invoke(item)
+                onItemClickListener.invoke(position)
             }
 
             Picasso.get()
@@ -81,7 +81,7 @@ class MediaAdapter : ListAdapter<Media, MediaAdapter.ViewHolder>(
         }
     }
 
-    fun setOnItemClickListener(onItemClickListener: (Media) -> Unit) {
+    fun setOnItemClickListener(onItemClickListener: (Int) -> Unit) {
         this.onItemClickListener = onItemClickListener
     }
 

@@ -2,6 +2,7 @@ package com.kumu.assessmentexam.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,13 +15,17 @@ import com.kumu.assessmentexam.data.MediaDatabase
 import com.kumu.assessmentexam.data.model.Media
 import com.kumu.assessmentexam.databinding.ActivityMainBinding
 import com.kumu.assessmentexam.details.MediaDetailsActivity
+import com.kumu.assessmentexam.details.VideoActivity
 import com.kumu.assessmentexam.main.adapters.MediaAdapter
 import com.kumu.assessmentexam.network.ApiInterface
+import com.kumu.assessmentexam.utils.AppPreferences
 import com.kumu.assessmentexam.utils.Coroutines
 import com.kumu.assessmentexam.utils.NetworkUtil
 import com.kumu.assessmentexam.utils.RetrofitSingleton
+import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class MainActivity : AppCompatActivity(), MainInterface {
 
@@ -40,11 +45,9 @@ class MainActivity : AppCompatActivity(), MainInterface {
         viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
         viewModel.mainListener = this
 
-        initUI()
+        AppPreferences.init(this)
 
-        Coroutines.inputOutput {
-            getMediaListFromDb()
-        }
+        initUI()
     }
 
     private fun initUI() {
@@ -54,20 +57,42 @@ class MainActivity : AppCompatActivity(), MainInterface {
                 //Update last visited date
                 val sdf = SimpleDateFormat("MMM dd, yyyy | hh:mm a")
                 val currentDate = sdf.format(Date())
-                it.lastVisited = currentDate
-                viewModel.updateLastVisit(it)
+                medias[it].lastVisited = currentDate
+                viewModel.updateLastVisit(medias[it])
+
+                notifyItemChanged(it)
 
                 //Redirect to Media Details
                 val gson = Gson()
                 val intent = Intent(this@MainActivity, MediaDetailsActivity::class.java)
-                intent.putExtra("media", gson.toJson(it))
+                intent.putExtra("media", gson.toJson(medias[it]))
+                AppPreferences.media = gson.toJson(medias[it])
                 startActivity(intent)
             }
+        }
+
+        binding.rvMedias.apply {
+            layoutManager =
+                LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+            setHasFixedSize(true)
+            adapter = mediaAdapter
         }
 
         binding.srlRefresh.setOnRefreshListener {
             binding.srlRefresh.isRefreshing = false
             checkInternetConnection()
+        }
+
+        if (AppPreferences.screen == 2) {
+            val intent = Intent(this@MainActivity, MediaDetailsActivity::class.java)
+            startActivity(intent)
+        } else if (AppPreferences.screen == 3) {
+            val intent = Intent(this@MainActivity, VideoActivity::class.java)
+            startActivity(intent)
+        }
+
+        Coroutines.inputOutput {
+            getMediaListFromDb()
         }
     }
 
@@ -108,12 +133,6 @@ class MainActivity : AppCompatActivity(), MainInterface {
 
     private fun initRecyclerview() {
         Coroutines.main {
-            binding.rvMedias.apply {
-                layoutManager =
-                    LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
-                setHasFixedSize(true)
-                adapter = mediaAdapter
-            }
             mediaAdapter.submitList(medias)
         }
     }

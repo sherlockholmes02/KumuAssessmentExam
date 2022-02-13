@@ -23,7 +23,21 @@ class MainViewModel(private val mainRepository: MainRepository) : ViewModel() {
             if (movieResponse.code() == 200) {
                 mainListener?.onSuccessfulFetch(movieResponse.body()?.media!!)
                 //Save to local db after successful fetching from api
-                mainRepository.saveMedias(movieResponse.body()?.media!!)
+                if (mainRepository.getMediasCount() == 0) {
+                    mainRepository.saveMedias(movieResponse.body()?.media!!)
+                } else {
+                    //Sync api media list to local db list without updating the last visited field
+                    var mediasDb = mainRepository.getMediasFromDbAsList()
+                    var mediasApi = movieResponse.body()?.media!!
+                    for (mediaApi in mediasApi) {
+                        for (mediaDb in mediasDb) {
+                            if (mediaApi.trackId == mediaDb.trackId) {
+                                mediaApi.lastVisited = mediaDb.lastVisited
+                            }
+                        }
+                    }
+                    mainRepository.updateMedias(mediasApi)
+                }
             }
             mainListener?.hideProgressBar()
         }

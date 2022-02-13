@@ -16,7 +16,13 @@ import retrofit2.Response
 class MainRepository(private val apiInterface: ApiInterface, private val mediaDatabase: MediaDatabase) {
 
     suspend fun getMedias(): Response<MediaResponse> {
-        return apiInterface.getMovies()
+        return apiInterface.getMedias()
+    }
+
+    suspend fun getMediasFromDbAsList(): List<Media> {
+        return withContext(Dispatchers.IO) {
+            mediaDatabase.mediaDao().get()
+        }
     }
 
     suspend fun getMediasFromDb(): LiveData<List<Media>> {
@@ -25,9 +31,21 @@ class MainRepository(private val apiInterface: ApiInterface, private val mediaDa
         }
     }
 
+    suspend fun getMediasCount(): Int {
+        return withContext(Dispatchers.IO) {
+            mediaDatabase.mediaDao().getCount()
+        }
+    }
+
     fun saveMedias(medias: List<Media>) {
         Coroutines.inputOutput {
             mediaDatabase.mediaDao().insertAllMedias(medias)
+        }
+    }
+
+    fun updateMedias(medias: List<Media>) {
+        Coroutines.inputOutput {
+            mediaDatabase.mediaDao().updateMedias(medias)
         }
     }
 

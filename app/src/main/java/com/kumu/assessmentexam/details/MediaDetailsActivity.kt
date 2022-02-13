@@ -12,6 +12,7 @@ import com.google.gson.Gson
 import com.kumu.assessmentexam.R
 import com.kumu.assessmentexam.data.model.Media
 import com.kumu.assessmentexam.databinding.ActivityMediaDetailsBinding
+import com.kumu.assessmentexam.utils.AppPreferences
 import com.kumu.assessmentexam.utils.NetworkUtil
 import com.squareup.picasso.Picasso
 
@@ -25,12 +26,23 @@ class MediaDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_media_details)
 
+        AppPreferences.init(this)
         initUI()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AppPreferences.screen = 2
     }
 
     private fun initUI() {
         val gson = Gson()
-        val media = gson.fromJson(intent.getStringExtra("media"), Media::class.java)
+        var intentMedia = intent.getStringExtra("media")
+        val media = if (intentMedia != null) {
+            gson.fromJson(intentMedia, Media::class.java)
+        } else {
+            gson.fromJson(AppPreferences.media, Media::class.java)
+        }
         binding.media = media
 
         //Handling for different kinds of media
@@ -39,10 +51,10 @@ class MediaDetailsActivity : AppCompatActivity() {
 
             binding.tvTrackName.text = media.trackName
             binding.clPrices.visibility = View.VISIBLE
-            binding.tvTrackPrice.text = "$ " + media.trackPrice.toString()
-            binding.tvTrackRentalPrice.text = "$ " + media.trackRentalPrice.toString()
-            binding.tvTrackHdPrice.text = "$ " + media.trackHdPrice.toString()
-            binding.tvTrackHdRentalPrice.text = "$ " + media.trackHdRentalPrice.toString()
+            binding.tvTrackPrice.text = "$" + media.trackPrice.toString()
+            binding.tvTrackRentalPrice.text = "$" + media.trackRentalPrice.toString()
+            binding.tvTrackHdPrice.text = "$" + media.trackHdPrice.toString()
+            binding.tvTrackHdRentalPrice.text = "$" + media.trackHdRentalPrice.toString()
 
             binding.tvAbout.text = "About this Movie"
             binding.tvAbout.visibility = View.VISIBLE
@@ -51,7 +63,7 @@ class MediaDetailsActivity : AppCompatActivity() {
         } else if (media.kind == getString(R.string.music)) {
             binding.tvTrackName.text = media.trackName
             binding.tvPrice.visibility = View.VISIBLE
-            binding.tvPrice.text = "$ " + media.trackPrice.toString()
+            binding.tvPrice.text = "$" + media.trackPrice.toString()
             binding.clPrices.visibility = View.GONE
             binding.tvAbout.visibility = View.GONE
             binding.tvLongDescription.visibility = View.GONE
@@ -87,15 +99,15 @@ class MediaDetailsActivity : AppCompatActivity() {
             .into(binding.ivArtwork)
 
         binding.ivBack.setOnClickListener {
-            finish()
+            onBackPressed()
         }
 
         binding.btnPlay.setOnClickListener {
             //Check internet connection before redirecting to video
             if (NetworkUtil.isNetworkAvailable(this)) {
                 val intent = Intent(this@MediaDetailsActivity, VideoActivity::class.java)
-                intent.putExtra("media", media.previewUrl)
-                intent.putExtra("kind", media.kind)
+                intent.putExtra("media", gson.toJson(media))
+                AppPreferences.media = gson.toJson(media)
                 startActivity(intent)
             } else {
                 Toast.makeText(
@@ -105,6 +117,11 @@ class MediaDetailsActivity : AppCompatActivity() {
                 ).show()
             }
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        AppPreferences.screen = 1
     }
 
     //Converter for tracktime to readable string

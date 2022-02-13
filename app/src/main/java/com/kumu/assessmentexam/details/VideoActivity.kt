@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.google.gson.Gson
 import com.kumu.assessmentexam.R
+import com.kumu.assessmentexam.data.model.Media
 import com.kumu.assessmentexam.databinding.ActivityMoviePlayerBinding
+import com.kumu.assessmentexam.utils.AppPreferences
 import kotlinx.android.synthetic.main.activity_movie_player.*
 
 /**
@@ -18,18 +21,34 @@ class VideoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_movie_player)
 
+        AppPreferences.init(this)
         initUI()
     }
 
+    override fun onResume() {
+        super.onResume()
+        AppPreferences.screen = 3
+    }
+
     private fun initUI() {
-        binding.vvVideo.setVideoPath(intent.getStringExtra("media"))
+        val gson = Gson()
+        var intentMedia = intent.getStringExtra("media")
+        val media = if (intentMedia != null) {
+            gson.fromJson(intentMedia, Media::class.java)
+        } else {
+            gson.fromJson(AppPreferences.media, Media::class.java)
+        }
+        binding.vvVideo.setVideoPath(media.previewUrl)
         binding.vvVideo.start()
 
-        if (intent.getStringExtra("kind") == getString(R.string.movie)) {
+        if (media.kind == getString(R.string.movie)) {
             ivMusic.visibility = View.GONE
         }
 
         binding.ivBack.setOnClickListener {
+            if (intentMedia == null) {
+                AppPreferences.screen = 1
+            }
             finish()
         }
     }

@@ -18,9 +18,15 @@ interface MediaDao {
     @Query("SELECT * FROM medias")
     fun getMedias(): LiveData<List<Media>>
 
+    @Query("SELECT COUNT(trackId) FROM medias")
+    fun getCount(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAllMedias(medias: List<Media>)
 
     @Update
     fun update(media: Media)
+
+    @Update(entity = Media::class)
+    fun updateMedias(medias: List<Media>)
 }
